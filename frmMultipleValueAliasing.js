@@ -32,6 +32,7 @@ export default class FrmMultipleValueAliasing extends Component {
       flupld: false,
       stsdup: 0,
       tempstr: "",
+      tempId:[]
     };
   }
 
@@ -49,6 +50,7 @@ export default class FrmMultipleValueAliasing extends Component {
     this.setState({ [event.target.name]: event.target.value });
   };
 
+  //For selecting one option
   onAfterSelect(selectedOptions, id, name) {
     if (selectedOptions.length > 0) {
       this.setState({
@@ -64,6 +66,7 @@ export default class FrmMultipleValueAliasing extends Component {
     }
   }
 
+   //For selecting multiple option
   async onAutoCOmpletMultiPleSelect(selectedOptions, name) {
     if (selectedOptions.length > 0) {
       this.setState({
@@ -76,6 +79,7 @@ export default class FrmMultipleValueAliasing extends Component {
     }
   }
 
+  // To get data for value aliasing from database
   async getData() {
     this.setState({
       loading: true,
@@ -92,6 +96,7 @@ export default class FrmMultipleValueAliasing extends Component {
       return false;
     }
 
+    debugger
     let tmpstr = "";
     for (let index = 0; index < this.state.tempId.length; index++) {
       var element = this.state.tempId[index];
@@ -101,7 +106,7 @@ export default class FrmMultipleValueAliasing extends Component {
         tmpstr = tmpstr + "," + element.DisplayId;
       }
     }
-
+    
     this.setState({ tempstr: tmpstr });
 
     let que1 =
@@ -117,6 +122,7 @@ export default class FrmMultipleValueAliasing extends Component {
     this.setState({ loading: false, adata: rs1 });
   }
 
+  //To delete row from the data received
   deleteRow(e) {
     let st = this.state.adata;
     this.setState({ adata: [] });
@@ -127,6 +133,7 @@ export default class FrmMultipleValueAliasing extends Component {
     this.forceUpdate();
   }
 
+  // For forward Alising
   EditRow(e) {
     // debugger
     console.log(e);
@@ -138,6 +145,7 @@ export default class FrmMultipleValueAliasing extends Component {
     }
   }
 
+  // To check if any row is selected
   async selectedDataFN(e) {
     if (e.length > 0) {
       this.setState({ selectedrows: e });
@@ -148,6 +156,7 @@ export default class FrmMultipleValueAliasing extends Component {
     }
   }
 
+  // For updating alising in the database
   async UpdateSelectedAliasing() {
     let st = this.state.selectedrows;
     this.setState({ loading: true });
@@ -202,6 +211,7 @@ export default class FrmMultipleValueAliasing extends Component {
     await this.updateData();
   }
 
+  // For deleting Aliasing
   async DeleteAliasing() {
     let st = this.state.selectedrows;
     this.setState({ loading: true });
@@ -222,6 +232,8 @@ export default class FrmMultipleValueAliasing extends Component {
     await this.updateData();
   }
 
+  // Updating the data once the changes are made (Edit, Delete)
+  // Also to check whether to do forward aliasing or reverse aliasing
   async updateData() {
     this.setState({ loading: true, adata: [] });
     let tmpstr = "";
@@ -261,6 +273,7 @@ export default class FrmMultipleValueAliasing extends Component {
     }
   }
 
+  // To allow reverse aliasing
   async AllowReverse(e) {
     if (e.target.checked === true) {
       this.setState({ stsdup: 1 });
@@ -269,6 +282,7 @@ export default class FrmMultipleValueAliasing extends Component {
     }
   }
 
+  // To create reference aliasing
   async UpdateReferenceAlising() {
     let MandatoryArray = [{ "REFERENCE TEMPLATE": this.state.ReftempId }];
     let check = MandatoryFormFields(MandatoryArray);
@@ -300,6 +314,7 @@ export default class FrmMultipleValueAliasing extends Component {
     }
   }
 
+  // Modal(popup) for reference aliasing. Multiple references can be used for single target
   async GetReference(e) {
     Modal.info({
       title: "GET TEMPLATE REFERENCE",
@@ -324,9 +339,9 @@ export default class FrmMultipleValueAliasing extends Component {
               filterId1={this.state.catid1}
               filter2="PortalID"
               filterId2={this.state.portalid}
-              placeholder="Please Select Template"
+              placeholder="Please Select Reference Template"
               onAfterSelect={(e) =>
-                this.onAfterSelect(e, "ReftempId", "ReftempName")
+                this.onAutoCOmpletMultiPleSelect(e, "tempId")
               }
               isValid={this.state.isValid}
             ></AutoCompletemulti>
@@ -366,11 +381,7 @@ export default class FrmMultipleValueAliasing extends Component {
     });
   }
 
-  async UpdateAliasingToNull() {}
 
-  async UpdateReverseAliasingToNull() {}
-
-  async UpdateSelectedAlisingNULL() {}
 
   render() {
     return (
@@ -475,7 +486,9 @@ export default class FrmMultipleValueAliasing extends Component {
                 ></AutoCompletemulti>
               </div>
 
-              {this.state.portalid === 24 && this.state.portalid !== undefined && (
+              {(this.state.portalid !== undefined) &&
+              (this.state.tempId.length <=1) &&
+              (
                 <div className="col-xs-6 col-sm-6 col-md-2 margintop">
                   <label>Upload file</label>
                   <span className="vcode">*</span>
