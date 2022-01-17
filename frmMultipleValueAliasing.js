@@ -31,8 +31,9 @@ export default class FrmMultipleValueAliasing extends Component {
       selectedrows: [],
       flupld: false,
       stsdup: 0,
-      tempstr: "",
-      tempId:[]
+      // tempstr: "",
+    // tempArrId:[],
+     
     };
   }
 
@@ -96,7 +97,7 @@ export default class FrmMultipleValueAliasing extends Component {
       return false;
     }
 
-    debugger
+   // debugger
     let tmpstr = "";
     for (let index = 0; index < this.state.tempId.length; index++) {
       var element = this.state.tempId[index];
@@ -107,7 +108,7 @@ export default class FrmMultipleValueAliasing extends Component {
       }
     }
     
-    this.setState({ tempstr: tmpstr });
+    // this.setState({ tempstr: tmpstr });
 
     let que1 =
       "EXEC frmValueAliasing_UpdatedGetAliasedData " +
@@ -156,7 +157,7 @@ export default class FrmMultipleValueAliasing extends Component {
     }
   }
 
-  // For updating alising in the database
+  // For updating or overwriting alising in the database
   async UpdateSelectedAliasing() {
     let st = this.state.selectedrows;
     this.setState({ loading: true });
@@ -189,7 +190,7 @@ export default class FrmMultipleValueAliasing extends Component {
         });
         if (st1.isConfirmed) {
         } else {
-          debugger;
+        // debugger;
           st.splice(i, 1);
 
           console.log(st);
@@ -245,7 +246,7 @@ export default class FrmMultipleValueAliasing extends Component {
         tmpstr = tmpstr + "," + element.DisplayId;
       }
     }
-    debugger;
+   // debugger;
     if (this.state.stsdup === 0) {
       let que1 =
         "EXEC frmValueAliasing_UpdatedGetAliasedData " +
@@ -298,20 +299,35 @@ export default class FrmMultipleValueAliasing extends Component {
     if (st.isConfirmed) {
       this.setState({ loading: true, adata: [] });
 
+      debugger
+      let tmpstr = "";
+      for (let index = 0; index < this.state.tempId1.length; index++) {
+        var element = this.state.tempId1[index];
+        if (tmpstr === "") {
+          tmpstr = element.DisplayId;
+        // } else {
+        //   tmpstr = tmpstr + "," + element.DisplayId;
+        }
+      
+
       let que2 =
         "EXEC FrmMultipleValueAliasingMaster_UpdateReferenceData  @loginID =" +
         this.state.loginId +
         " , @tempId =" +
-        this.state.tempId;
-      que2 += " ,  @refTempId =" + this.state.ReftempId;
+     tmpstr ;
+      que2 += " ,  @refTempId =" + this.state.ReftempId  ;
       let rs2 = await getDataTable(que2);
 
-      await this.updateData();
-
-      // this.setState({ loading: false, aData: rs2 })
-    } else {
+      this.setState({ loading: false, adata: rs2, stsdup:0})
+     
+    
+    await this.updateData();
+      }  
+  }
+     else {
       return false;
-    }
+    
+  }
   }
 
   // Modal(popup) for reference aliasing. Multiple references can be used for single target
@@ -339,16 +355,16 @@ export default class FrmMultipleValueAliasing extends Component {
               filterId1={this.state.catid1}
               filter2="PortalID"
               filterId2={this.state.portalid}
-              placeholder="Please Select Reference Template"
+              placeholder="Please Select Template"
               onAfterSelect={(e) =>
-                this.onAutoCOmpletMultiPleSelect(e, "tempId")
+                this.onAutoCOmpletMultiPleSelect(e, "tempId1")
               }
               isValid={this.state.isValid}
             ></AutoCompletemulti>
           </div>
 
           <div className="col-xs-6 col-sm-6 col-md-7 margintop">
-            <label>Select Template</label>
+            <label>Select Ref Template</label>
             <AutoCompleteCascad
               id="catid"
               frmNm="FRMUPDATEATTRIBUTEALIASING"
@@ -358,7 +374,7 @@ export default class FrmMultipleValueAliasing extends Component {
               filterId1={this.state.catid1}
               filter2="PortalID"
               filterId2={this.state.portalid}
-              placeholder="Please Select Template"
+              placeholder="Please Select Ref Template"
               onAfterSelect={(e) =>
                 this.onAfterSelect(e, "ReftempId", "ReftempName")
               }
@@ -487,7 +503,7 @@ export default class FrmMultipleValueAliasing extends Component {
               </div>
 
               {(this.state.portalid !== undefined) &&
-              (this.state.tempId.length <=1) &&
+              (this.state.tempId !== undefined) && (this.state.tempId.length === 1) &&
               (
                 <div className="col-xs-6 col-sm-6 col-md-2 margintop">
                   <label>Upload file</label>
